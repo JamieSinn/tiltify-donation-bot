@@ -27,7 +27,7 @@ module.exports = (client, aliases, perms, callback) => {
 				if (command === prefix + "help" || command === prefix + "h" || command === prefix + "commands" | command === prefix + "guide")
 					callback(message, guild, data)
 				else if (guild === undefined && command !== prefix + 'setup')
-					message.channel.send('The bot has not been set up on this server! Please type `$setup <campaign_ID> <auth_token>` to start, or `$help` for a list of commands.');
+					message.channel.send('The bot has not been set up on this server! Please type `$setup <campaign_ID>` to start, or `$help` for a list of commands.');
 				else if (perms) {
 					if (message.member.hasPermission('ADMINISTRATOR') || message.member.hasPermission('MANAGE_CHANNELS') || message.member.roles.cache.get(guild.role)) {
 						hasPerms = true;

@@ -31,7 +31,11 @@ client.once('ready', () => {
 		if (!message.guild.me.hasPermission('MANAGE_MESSAGES'))
 			message.channel.send('I must have the manage messages permission to do that!');
 		else {
-			if (content[1] !== undefined && content[2] !== undefined) {
+			if (content[1] !== undefined) {
+				if(content[2] === undefined)
+				{
+					content[2] = "";
+				}
 				fetch(`https://tiltify.com/api/v3/campaigns/${content[1]}`, {
 					method: 'GET',
 					headers: {
@@ -47,23 +51,45 @@ client.once('ready', () => {
 							message.channel.send(`Your Tiltify campaign ID or auth token is incorrect!`);
 						else {
 							if (guild !== undefined) {
-								guild.name = message.guild.name;
-								guild.id = message.guild.id;
-								guild.channel = message.channel.id;
-								guild.tiltifyCampaignID = content[1];
-								guild.tiltifyAuthToken = content[2];
-								guild.campaignURL = 'https://tiltify.com/@' + tiltifyData.data.user.slug + '/' + tiltifyData.data.slug;
-								guild.lastDonationID = 0;
-								guild.showDonations = false;
+								if(guild.campaigns[""+content[1]] === undefined)
+								{
+
+									guild.name = message.guild.name;
+									guild.id = message.guild.id;
+								    guild.channel = message.channel.id;
+
+									guild.campaigns[""+content[1]] = {
+										tiltifyCampaignID: content[1],
+										channel: message.channel.id,
+										tiltifyAuthToken: content[2], 
+										campaignURL: 'https://tiltify.com/@' + tiltifyData.data.user.slug + '/' + tiltifyData.data.slug,
+										showDonations: true,
+									};
+									numCampaigns++;
+								} 
 								guild.prefix = defaultPrefix;
 							}
 							else {
-								data.push({ name: message.guild.name, id: message.guild.id, channel: message.channel.id, tiltifyCampaignID: content[1], tiltifyAuthToken: content[2], campaignURL: 'https://tiltify.com/@' + tiltifyData.data.user.slug + '/' + tiltifyData.data.slug, showDonations: false, prefix: defaultPrefix });
+								var newGuild ={ 
+									name: message.guild.name, 
+									id: message.guild.id, 
+									channel: message.channel.id, 
+									campaigns: {},
+									prefix: defaultPrefix 
+								};
+								newGuild.campaigns[""+content[1]] = {
+											tiltifyCampaignID: content[1], 
+											tiltifyAuthToken: content[2], 
+											channel: message.channel.id, 
+											campaignURL: 'https://tiltify.com/@' + tiltifyData.data.user.slug + '/' + tiltifyData.data.slug,
+											showDonations: true,
+										}
+								data.push(newGuild);
 								numCampaigns++;
 								updateBotStatus();
 							}
 							fs.writeFileSync(guildData, JSON.stringify(data));
-							message.channel.send('Donations have been set to campaign ID `' + content[1] + '`.')
+							message.channel.send('Donations will feed from campaign ID `' + content[1] + '` now.')
 						}
 					});
 			}
@@ -134,7 +160,7 @@ client.once('ready', () => {
 	});
 
 	command(client, ['creator', 'about'], false, (message) => {
-		message.channel.send('Tiltify Bot was created by nicnacnic. Why don\'t you follow him over at https://twitch.tv/nicnacnic and https://twitter.com/nicnacnic11!');
+		message.channel.send('Tiltify Bot was created by nicnacnic, and heavily modified by JamieSinn.');
 	});
 
 	command(client, ['help', 'commands', 'h'], false, (message, guild) => {
